@@ -1,0 +1,23 @@
+\abstract
+
+\noindent KEYWORDS: \hspace*{0.5em} 
+\parbox[t]{4.4in}{  
+  Genetic Programming;
+	Symbolic Regression; 
+  CUDA;
+  GPGPU programming; 
+  Stack-based virtual machines; 
+}
+
+\vspace*{24pt}
+
+\noindent Genetic Programming(GP) is a domain-independent technique for evolving computer programs on the principles of genetics and natural selection. In the context of machine learning, it is one example of an evolutionary algorithm, which iteratively finds solutions to optimization problems through fitness functions and repeated evolution. As such, GP has several inherently parallel steps, making it an ideal candidate for GPU based parallelization. 
+
+In this thesis, implementation details involving the parallelization of stack-based Genetic Programming algorithms (more specifically, symbolic regression and transformation) on GPUs are explored. To achieve higher performance and scalability, we focus on parallelizing the selection and evaluation steps of the generational GP algorithm, through parallel tournament-based candidate selections, candidate expression-tree evaluation using a fixed size stack machine in GPU memory, and batching of fitness computations for whole program populations. 
+During program mutations, we restrict program depth by introducing a hoisted version of the crossover operation between a parent and a donor program. 
+
+Our work then profiles the performance of the new parallel GP algorithm on Airfoil Self-Noise, Airline on-time performance and YearPredictionMSD datasets, and compares the results with other standard symbolic regression libraries and naive linear regression. 
+% The statement below will change after final benchmaks
+
+Using nVidia Tesla V100 GPUs, average speedups of upto $10 \times$ were observed on the performance benchmarks of our algorithm against CPU-only implementations of the standard GP libraries.
+\pagebreak
