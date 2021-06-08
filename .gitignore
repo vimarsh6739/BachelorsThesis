@@ -8,3 +8,16 @@
 *.synctex.gz
 *.synctex.gz(busy)
 *.pdfsync
+
+*.aux
+*.bbl
+*.log 
+*.blg
+*.out
+*.lof
+*.lot
+*.toc
+*.fls
+
+.ipynb_checkpoints/
+mutations.ipynb

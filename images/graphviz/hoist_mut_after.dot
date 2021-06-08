@@ -1,0 +1,19 @@
+digraph hoist_mut_after {
+	compound=true
+	ordering=out
+	A2 [label="+"]
+	C2 [label="-"]
+	E2 [label="*" style=filled]
+	F2 [label=X2]
+	G2 [label=sin]
+	J2 [label=X1 style=filled]
+	K2 [label=X1 style=filled]
+	L2 [label=X2]
+	A2 -> E2
+	A2 -> C2
+	C2 -> F2
+	C2 -> G2
+	E2 -> J2
+	E2 -> K2
+	G2 -> L2
+}

@@ -1,0 +1,26 @@
+digraph hoist_mut_before {
+	compound=true
+	A1 [label="+"]
+	B1 [label="-"]
+	C1 [label="-"]
+	D1 [label="*"]
+	E1 [label="*" style=filled]
+	F1 [label=X2]
+	G1 [label=sin]
+	H1 [label=X0]
+	I1 [label=X0]
+	J1 [label=X1 style=filled]
+	K1 [label=X1 style=filled]
+	L1 [label=X2]
+	A1 -> B1
+	A1 -> C1
+	B1 -> D1
+	B1 -> E1
+	C1 -> F1
+	C1 -> G1
+	D1 -> H1
+	D1 -> I1
+	E1 -> J1
+	E1 -> K1
+	G1 -> L1
+}

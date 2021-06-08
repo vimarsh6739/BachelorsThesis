@@ -1,0 +1,26 @@
+digraph point_mut_after {
+	compound=true
+	A2 [label=max style=filled]
+	B2 [label="-"]
+	C2 [label="-"]
+	D2 [label="+" style=filled]
+	E2 [label="*"]
+	F2 [label=X2]
+	G2 [label=cos style=filled]
+	H2 [label=X0]
+	I2 [label=0.938 style=filled]
+	J2 [label=X1]
+	K2 [label=X2 style=filled]
+	L2 [label=X2]
+	A2 -> B2
+	A2 -> C2
+	B2 -> D2
+	B2 -> E2
+	C2 -> F2
+	C2 -> G2
+	D2 -> H2
+	D2 -> I2
+	E2 -> J2
+	E2 -> K2
+	G2 -> L2
+}

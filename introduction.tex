@@ -69,24 +69,52 @@
  
  \section{Example Figures and tables}
  
- Figure \ref{fig:iitm} shows a simple figure for illustration along with
+ \Cref{fig:point_mut} shows a simple figure for illustration along with
  a long caption.  The formatting of the caption text is automatically
- single spaced and indented.  Table~\ref{tab:sample} shows a sample
+ single spaced and indented. \Cref{tab:sample} shows a sample
  table with the caption placed correctly.  The caption for this should
  always be placed before the table as shown in the example.
- 
- 
- \begin{figure}[htpb]
-   \begin{center}
-     \resizebox{50mm}{!} {\includegraphics *{images/iitm.pdf}}
-     \resizebox{50mm}{!} {\includegraphics *{images/iitm.pdf}}
-     \caption {Two IITM logos in a row.  This is also an
-       illustration of a very long figure caption that wraps around two
-       two lines.  Notice that the caption is single-spaced.}
-   \label{fig:iitm}
-   \end{center}
- \end{figure}
- 
+
+\begin{figure}[htp]
+  \centering
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[scale=0.8]{images/graphviz/point_mut_before.dot.pdf}
+    \caption{The original expression tree}
+    \label{fig:point_muta}
+  \end{subfigure}%
+  \\
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[scale=0.8]{images/graphviz/point_mut_after.dot.pdf}
+    \caption{The same expression tree after replacing some nodes(shaded here) with another node of the same arity}
+    \label{fig:point_mutb}
+  \end{subfigure}
+  \caption{Visualizing point mutations}
+  
+  \label{fig:point_mut}
+\end{figure}
+
+\begin{figure}[htp]
+  \centering
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[scale=0.8]{images/graphviz/hoist_mut_before.dot.pdf}
+    \caption{The original expression tree. The subtree to be hoisted is highlighted.}
+    \label{fig:hoist_muta}
+  \end{subfigure}%
+  \\
+  \begin{subfigure}{\textwidth}
+    \centering
+    \includegraphics[scale=0.8]{images/graphviz/hoist_mut_after.dot.pdf}
+    \caption{The same expression tree after hoisting the subtree}
+    \label{fig:hoist_mutb}
+  \end{subfigure}
+  \caption{Visualizing hoist mutations}
+  
+  \label{fig:hoist_mut}
+\end{figure}
+
  \begin{table}[htbp]
    \caption{A sample table with a table caption placed
      appropriately. This caption is also very long and is
