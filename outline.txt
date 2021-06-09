@@ -1,0 +1,24 @@
+Abstract
+Introduction
+	- The PS
+	- Our contributions
+	- Outline of the rest of the chapters
+	- bit of the conclusion here
+
+Bg And Related Work
+	- Algorithm 
+	- Visualization
+	- Other libraries (not necessarily GP)
+	
+Our Work
+	- Explain algo
+	- Challenges faced
+	
+Experimental Evaluation
+	- program evaluation time(execution_kernel)
+	- Table + histogram of the above(average out either num_rows or pop size)
+	- Runtime on 3 datasets
+	- Fitness and height progression with #generations
+	
+Conclusion and Future Work
+	- Summary of results from experiments

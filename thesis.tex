@@ -11,8 +11,8 @@
 \usepackage{caption}
 \usepackage{subcaption}
 \usepackage{graphicx}
-% \usepackage[square,numbers,sort]{natbib}
-\usepackage[square]{natbib}
+\usepackage[square,numbers,sort]{natbib}
+% \usepackage[square]{natbib}
 \usepackage{hyperref} % hyperlinks for references.
 \usepackage{algorithmic}
 \usepackage{algorithm}
@@ -43,13 +43,13 @@
 \end{singlespace} 
 
 % Certificate
-\input{certificate.tex}
+\include{certificate}
 
 % Acknowledgements
-\input{acknowledgement.tex}
+\include{acknowledgement}
 
 % Abstract
-\input{abstract.tex}
+\include{abstract}
 
 % Table of contents
 \begin{singlespace}
@@ -62,22 +62,24 @@
 \addcontentsline{toc}{chapter}{LIST OF FIGURES}
 \end{singlespace}
 
-\input{abbrev.tex}
-\input{notation.tex}
+\include{abbrev}
+% \include{notation}
 
 %The main text will follow from this point so set the page numbering
 %to arabic from here on.
 \pagenumbering{arabic}
 
 % Chapters start here
-\input{introduction.tex}
-\input{related_work.tex}
-\input{experimental_evaluation.tex}
+\include{introduction}
+\include{relatedwork}
+\include{ourwork}
+\include{experimental_evaluation}
+\include{conclusion}
 
 % End content
-\input{appendix.tex}
-\input{list_of_papers.tex}
-\input{bibliography.tex}
+% \include{appendix}
+% \include{list_of_papers}
+\include{bibliography}
 
 \end{document}
 
