@@ -1,7 +1,8 @@
 \chapter{OUR WORK}
 \label{chap:ourwork}
-This chapter contains implementation details about the parallelization of the generational GP algorithms using CUDA. We first talk about a way to represent programs on the GPU. This is then followed by a description of the device side data structures used. We then give an overview of our modified GP algorithm, describing GPU-side optimizations for the selection, and evaluation step in detail. We also include details about the fitness computation step which comes after the evaluation step. Finally, we talk about the various challenges faced during the implementation of the modified algorithm, and the workarounds to avoid these problems.
+This chapter contains the implementation details of our parallelized algorithm to perform genetic programming using CUDA. We first talk about a way to represent programs on the GPU. This is then followed by a description of the device side data structures used. We then give an overview of our modified GP algorithm, describing GPU-side optimizations for the selection, and evaluation step in detail. We also include details about the fitness computation step which comes after the evaluation step. Finally, we talk about the various challenges faced during the implementation of the modified algorithm, and the workarounds to avoid these problems.
 
+In this implementation, we use a fixed list of functions with a maximum arity of $2$. We also assume that the maximum depth of all expression trees is a constant. This assumption is needed in order to evaluate the trees in the GPU using a fixed size stack.
 \section{Input Representation}
 \section{Device Side Data Structures}
 \section{The Modified Algorithm}

@@ -17,11 +17,31 @@
 \usepackage{hyperref} % hyperlinks for references.
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{tcolorbox}
 \usepackage{cleveref}
 
-% \include{commands}
+\newcommand{\lstfont}[1]{\color{#1}\scriptsize\ttfamily}
+\lstset{
+    language=[ANSI]C++,
+    showstringspaces=false,
+    backgroundcolor=\color{black!90},
+    basicstyle=\lstfont{white},
+    identifierstyle=\lstfont{white},
+    keywordstyle=\lstfont{magenta!40},
+    numberstyle=\lstfont{white},
+    stringstyle=\lstfont{cyan},
+    commentstyle=\lstfont{yellow!30},
+    emph={
+        cudaMalloc, cudaFree,
+        __global__, __shared__, __device__, __host__,
+        __syncthreads,
+    },
+    emphstyle={\lstfont{magenta!60!white}},
+    breaklines=true
+}
 
-% Strut macros for skipping spaces above and below text in tables. 
+% Strut macros for skipping spaces above and below text in tables.
 \def\abovestrut#1{\rule[0in]{0in}{#1}\ignorespaces}
 \def\belowstrut#1{\rule[-#1]{0in}{#1}\ignorespaces}
 
@@ -40,8 +60,8 @@
 
 %\nocite{*}
 \begin{singlespace}
-\maketitle 
-\end{singlespace} 
+\maketitle
+\end{singlespace}
 
 % Certificate
 \include{certificate}
