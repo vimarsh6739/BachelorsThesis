@@ -1,2 +1,21 @@
 \chapter{OUR WORK}
 \label{chap:ourwork}
+This chapter contains implementation details about the parallelization of the generational GP algorithms using CUDA. We first talk about a way to represent programs on the GPU. This is then followed by a description of the device side data structures used. We then give an overview of our modified GP algorithm, describing GPU-side optimizations for the selection, and evaluation step in detail. We also include details about the fitness computation step which comes after the evaluation step. Finally, we talk about the various challenges faced during the implementation of the modified algorithm, and the workarounds to avoid these problems.
+
+\section{Input Representation}
+\section{Device Side Data Structures}
+\section{The Modified Algorithm}
+
+\subsection{Optimizations on Selection}
+\subsection{Optimizations on Evaluation}
+\subsection{Optimizations for Fitness Computation}
+
+\section{Challenges Faced}
+\subsection{Avoiding Register Stack Spills}
+\subsection{Data Transfers and Memory Allocation}
+\subsection{Fixed Depth Mutations}
+\subsection{Precision of fitness computations}
+
+
+
+
