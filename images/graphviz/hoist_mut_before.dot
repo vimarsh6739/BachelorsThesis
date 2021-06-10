@@ -1,14 +1,14 @@
 digraph hoist_mut_before {
 	compound=true
 	A1 [label="+"]
-	B1 [label="-"]
+	B1 [label="-" fillcolor=darkgrey style=filled]
 	C1 [label="-"]
-	D1 [label="*"]
+	D1 [label="*" fillcolor=darkgrey style=filled]
 	E1 [label="*" style=filled]
 	F1 [label=X2]
 	G1 [label=sin]
-	H1 [label=X0]
-	I1 [label=X0]
+	H1 [label=X0 fillcolor=darkgrey style=filled]
+	I1 [label=X0 fillcolor=darkgrey style=filled]
 	J1 [label=X1 style=filled]
 	K1 [label=X1 style=filled]
 	L1 [label=X2]
