@@ -277,3 +277,45 @@
   archivePrefix={arXiv},
   primaryClass={cs.PL}
 }
+
+@inproceedings{push3Stack,
+  author = {Spector, Lee and Klein, Jon and Keijzer, Maarten},
+  title = {The Push3 Execution Stack and the Evolution of Control},
+  year = {2005},
+  isbn = {1595930108},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/1068009.1068292},
+  doi = {10.1145/1068009.1068292},
+  abstract = {The Push programming language was developed for use in genetic and evolutionary computation systems, as the representation within which evolving programs are expressed. It has been used in the production of several significant results, including results that were awarded a gold medal in the Human Competitive Results competition at GECCO-2004. One of Push's attractive features in this context is its transparent support for the expression and evolution of modular architectures and complex control structures, achieved through explicit code self-manipulation. The latest version of Push, Push3, enhances this feature by permitting explicit manipulation of an execution stack that contains the expressions that are queued for execution in the interpreter. This paper provides a brief introduction to Push and to execution stack manipulation in Push3. It then presents a series of examples in which Push3 was used with a simple genetic programming system (PushGP) to evolve programs with non-trivial control structures.},
+  booktitle = {Proceedings of the 7th Annual Conference on Genetic and Evolutionary Computation},
+  pages = {1689–1696},
+  numpages = {8},
+  keywords = {stack-based genetic programming, parity, push, Fibonacci sequence, reversing a list, factorial, sorting, iteration, recursion, combinators, exponentiation},
+  location = {Washington DC, USA},
+  series = {GECCO '05}
+}
+
+@inproceedings{Philox2011,
+  author = {Salmon, John K. and Moraes, Mark A. and Dror, Ron O. and Shaw, David E.},
+  title = {Parallel Random Numbers: As Easy as 1, 2, 3},
+  year = {2011},
+  isbn = {9781450307710},
+  publisher = {Association for Computing Machinery},
+  address = {New York, NY, USA},
+  url = {https://doi.org/10.1145/2063384.2063405},
+  doi = {10.1145/2063384.2063405},
+  abstract = {Most pseudorandom number generators (PRNGs) scale poorly to massively parallel high-performance computation because they are designed as sequentially dependent state transformations. We demonstrate that independent, keyed transformations of counters produce a large alternative class of PRNGs with excellent statistical properties (long period, no discernable structure or correlation). These counter-based PRNGs are ideally suited to modern multi-core CPUs, GPUs, clusters, and special-purpose hardware because they vectorize and parallelize well, and require little or no memory for state. We introduce several counter-based PRNGs: some based on cryptographic standards (AES, Threefish) and some completely new (Philox). All our PRNGs pass rigorous statistical tests (including TestU01's BigCrush) and produce at least 264 unique parallel streams of random numbers, each with period 2128 or more. In addition to essentially unlimited parallel scalability, our PRNGs offer excellent single-chip performance: Philox is faster than the CURAND library on a single NVIDIA GPU.},
+  booktitle = {Proceedings of 2011 International Conference for High Performance Computing, Networking, Storage and Analysis},
+  articleno = {16},
+  numpages = {12},
+  location = {Seattle, Washington},
+  series = {SC '11}
+}
+
+  
+
+
+
+  
+

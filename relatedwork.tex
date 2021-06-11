@@ -36,6 +36,13 @@ In \cref*{subsec:selection} to \cref*{subsec:evaluation}, we dive deep into the 
   \end{algorithmic}
 \end{algorithm}
 
+Before talking about selection, we first talk about initialization methods for the first generation programs. The following $3$ methods are some of the standard initialization methods \citep{Koza92},\citep{luke:2000:2ftcaGP}
+\begin{itemize}
+    \item \textbf{Full initialization} - All trees in the current generation are "dense", that is, only leaf nodes are terminals(variables or constants).
+    \item \textbf{Grow initialization} - All trees grown in the current generation need not be "dense", and some of the non-leaf nodes can also be terminals. 
+    \item \textbf{Ramped half and half} - Half of the population trees are initialized using the Full method, and the other half is initialized using the Grow method. This is the most common method used for initializing programs.
+\end{itemize}
+In our code, we provide support for all $3$ initialization methods.
 \subsection{Selection}
 \label{subsec:selection}
 Selection is the step where individual candidates from a given population are chosen for evolution into the next generation. Some commonly used selection schemes are as follows \cite{GOLDBERG199169}:
