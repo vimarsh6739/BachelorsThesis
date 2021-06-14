@@ -58,14 +58,14 @@ The mutation of programs takes place on the CPU itself. We implement all the mut
 \subsubsection{Hoisted Crossover}
 
 In this mutation, we initially perform a crossover between the parent tree and the donor tree. The selected stubtree of the donor is then repeatedly hoisted onto the parent tree until the depth of the resultant tree is less than the maximum evaluation stack size. \\
-Note that the hoist mutation occurs only on the donor sub-tree, since that is the part of the tree which contributes to the depth violation. If this was not the case, then another sub-tree of the parent sub-tree would have contributed towards the max depth violation, making the parent program itself an invalid one. \\
+Note that the hoist mutation occurs only on the donor subtree, since that is the part of the tree which contributes to the depth violation. If this was not the case, then another subtree of the parent subtree would have contributed towards the max depth violation, making the parent program itself an invalid one. \\
 This modification is necessary for our code since a stack of fixed size $m$ can only evaluate a tree of depth $m-1$(assuming the maximum function arity is $2$)
 
-At the end of mutations, we allocate and transfer the newly created programs onto GPU memory, in order to evaluate them on the input data-set. In order to save on device memory, we also deallocate the GPU memory of the previous population trees. Some of the challenges we faced due to the nested nature of programs during the \lstinline!cudaMemcpy! operations between host and device memory are listed in \cref{sec:challenges}. 
+At the end of mutations, we allocate and transfer the newly created programs onto GPU memory, in order to evaluate them on the input dataset. In order to save on device memory, we also deallocate the GPU memory of the previous population trees. Some of the challenges we faced due to the nested nature of programs during the \lstinline!cudaMemcpy! operations between host and device memory are listed in \cref{sec:challenges}. 
 
 \subsection{Evaluation}
 \label{ow:evaluation}
-We divide the evaluation portion into $2$ steps, namely execution and metric computation. In the execution step, all programs in the new population are evaluated on the given data-set, to produce a set of predictions. Once we have the predicted values for all programs, we compute the raw fitness value of the every program with respect to the expected output using the user-defined metric. These steps are explained in detail below.  
+We divide the evaluation portion into $2$ steps, namely execution and metric computation. In the execution step, all programs in the new population are evaluated on the given dataset, to produce a set of predictions. Once we have the predicted values for all programs, we compute the raw fitness value of the every program with respect to the expected output using the user-defined metric. These steps are explained in detail below.  
 
 \subsubsection{Execution}
 \label{subsec:execute}
@@ -101,15 +101,15 @@ In the execution kernel, during the evaluation phase, when evaluating a stack no
 
 Since CUDA executes statements using warps of $32$ threads in parallel, when it encounters an \lstinline!if-else! block inside a kernel which is triggered only for a subset of the warp, both the \lstinline!if! and \lstinline!else! block are executed by all threads. During the execution of the \lstinline!if! block, the threads which don't trigger the \lstinline!if! condition are masked, but still consume resources, with the same behaviour exhibited for the \lstinline!else! block. This increases the total execution time as both blocks are effectively processed by all warp threads. 
 
-To avoid this behaviour in our code, we ensure that within every thread-block of the execution kernel, all threads execute the same program. This ensures that all threads in a warp will always take the same branch during node identification, and thus avoid divergence during a single stack evaluation.
+To avoid this behaviour in our code, we ensure that within every thread-block of the execution kernel, all threads execute the same program. This ensures that all threads in a warp will always parallely execute the same nodes, and thus avoid divergence during a single stack evaluation.
 
 In the implementation of \textbf{push} and \textbf{pop} operations for the device side stack, we avoid trying a possible dereference using global memory index(the current number of elements in the stack) by using an unrolled loop for stack memory access. This is again safe from thread divergence because we ensure that within a thread-block, all threads evaluate the same program. 
 
-\subsection{Memory Transfers and Allocation}
+\subsection{Data Transfers and Memory Allocation}
 \label{prob:memcpy}
 Since we went with a AoS representation for the list of programs and each program has a nested pointer for the list of nodes in it, we are forced to perform at least $2$ \lstinline!cudaMemcpy! operations per program in a loop spanning the population size. One of the copy operations is for the list of program nodes, and the other copy is to capture the metadata about the nodes, and the other copy is for the program struct itself. 
 
-Since all our computations are ordered on a single CUDA stream, transferring programs back and forth the device in a loop slows down the overall time for training. However, in our experiments, we observed that the dominant contributor to execution time was the evaluation step, and not memory transfers. Thus, the implementation was not altered.
+However, during our experiments, we achieved a considerable speedup despite this step. Thus, the implementation was not altered.
 
 In the next chapter, we will describe some benchmark experiments and present our results. 
 
