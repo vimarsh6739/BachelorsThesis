@@ -9,11 +9,11 @@ Note that throughout this chapter, the terms program and expression tree are int
 The generational GP algorithm gives us a method to evolve candidate programs using the principles of natural selection. There are $3$ main steps involved in the algorithm. 
 \begin{itemize}
   \item Selection - In this step, we decide on a set of programs to evolve into the next generation, using a selection criterion. 
-  \item Mutation/Genetic operation - Before promoting the programs selected in the previous step to the next generation, we perform some genetic operations like  on them. 
-  \item Evaluation - We again evaluate the mutated programs on the input to recompute fitness scores. 
+  \item Mutation - Before promoting the programs selected in the previous step to the next generation, we perform some genetic operations on them. 
+  \item Evaluation - We again evaluate the mutated programs on the input dataset to recompute fitness scores. 
 \end{itemize}
 
-\Cref{gpalgo} formalizes the above $3$ steps. The initial set of programs is usually randomly generated. The termination criterion defined in \cref*{gpalgoendloop} of the algorithm is usually activated when the number of generations reaches a maximum limit or the an early convergence is reached on the given input dataset(governed by a user-specified threshold).
+\Cref{gpalgo} formalizes the above $3$ steps. The initial set of programs is usually randomly generated. The termination criterion defined in \cref*{gpalgoendloop} of the algorithm is usually activated when the number of generations reaches a maximum limit or the an early convergence is reached on the given input dataset (usually governed by a user-specified threshold on fitness).
 
 In \cref*{subsec:selection} to \cref*{subsec:evaluation}, we dive deep into the selection, mutation and execution steps of the generational GP agorithm. In \cref*{subsec:mutation}, we define and implement $4$ different possible types of mutation along with reproduction.
 
@@ -36,13 +36,16 @@ In \cref*{subsec:selection} to \cref*{subsec:evaluation}, we dive deep into the 
   \end{algorithmic}
 \end{algorithm}
 
-Before talking about selection, we first talk about initialization methods for the first generation programs. The following $3$ methods are some of the standard initialization methods \citep{Koza92},\citep{luke:2000:2ftcaGP}
+Before going into selection, we first talk about initialization methods for the first generation programs. There are $3$ standard initialization techniques \citep{Koza92},\citep{luke:2000:2ftcaGP}
 \begin{itemize}
     \item \textbf{Full initialization} - All trees in the current generation are "dense", that is, only leaf nodes are terminals(variables or constants).
     \item \textbf{Grow initialization} - All trees grown in the current generation need not be "dense", and some of the non-leaf nodes can also be terminals. 
     \item \textbf{Ramped half and half} - Half of the population trees are initialized using the Full method, and the other half is initialized using the Grow method. This is the most common method used for initializing programs.
 \end{itemize}
-In our code, we provide support for all $3$ initialization methods.
+
+In addition to the above $3$ methods, we note that there are other initialization algorithms which grant the user more control over tree initialization with respect to tree depth and node probabilities\citep{luke:2000:2ftcaGP}.
+However, we provide support only for the $3$ standard initialization methods in our implementation.
+
 \subsection{Selection}
 \label{subsec:selection}
 Selection is the step where individual candidates from a given population are chosen for evolution into the next generation. Some commonly used selection schemes are as follows \cite{GOLDBERG199169}:
@@ -131,19 +134,20 @@ Crossover is considered as the principle method for evolution in our implementat
 
 \begin{figure}[htp]
   \centering
-  \begin{subfigure}{\textwidth}
-    \raggedleft
-    \includegraphics[scale=0.75]{images/graphviz/crossover_before.dot.pdf}
-    \caption{The parent and donor expression trees, both selected through tournaments are shown here.}
-    \label{fig:crossover_muta}
-  \end{subfigure}%
-  \\
-  \begin{subfigure}{\textwidth}
-    \centering
-    \includegraphics[scale=0.75]{images/graphviz/crossover_after.dot.pdf}
-    \caption{The child expression tree after replacing a subtree of the parent with that of the donor.}
-    \label{fig:crossover_mutb}
-  \end{subfigure}
+    \begin{subfigure}{\columnwidth}
+      \begin{adjustbox}{width=\columnwidth,center}
+        \includegraphics{images/graphviz/crossover_before.dot.pdf}
+      \end{adjustbox}
+      \caption{The parent and donor expression trees, both selected through tournaments are shown here.}
+      \label{fig:crossover_muta}
+    \end{subfigure}%
+    \\
+    \begin{subfigure}{\textwidth}
+      \centering
+      \includegraphics[scale=0.75]{images/graphviz/crossover_after.dot.pdf}
+      \caption{The child expression tree after replacing a subtree of the parent with that of the donor.}
+      \label{fig:crossover_mutb}
+    \end{subfigure}
   \caption{Visualizing crossover mutations for a given parent and donor program.}
   
   \label{fig:crossover}
@@ -158,8 +162,9 @@ In subtree mutations, we perform a crossover between the winning parent tree and
 \begin{figure}[htp]
   \centering
   \begin{subfigure}{\textwidth}
-    \raggedleft
-    \includegraphics[scale=0.75]{images/graphviz/subtree_before.dot.pdf}
+    \begin{adjustbox}{width=\columnwidth,center}
+      \includegraphics{images/graphviz/subtree_before.dot.pdf}
+    \end{adjustbox}
     \caption{The parent expression tree and a randomly generated tree is shown here.}
     \label{fig:subtree_muta}
   \end{subfigure}%
@@ -171,7 +176,6 @@ In subtree mutations, we perform a crossover between the winning parent tree and
     \label{fig:subtree_mutb}
   \end{subfigure}
   \caption{Visualizing subtree mutations for a given parent program.}
-  
   \label{fig:subtree}
 \end{figure}
   
