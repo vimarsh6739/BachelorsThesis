@@ -13,12 +13,15 @@
 
 \noindent Genetic Programming(GP) is a domain-independent technique for evolving computer programs on the principles of genetics and natural selection. In the context of machine learning, it is one example of an evolutionary algorithm, which iteratively finds solutions to optimization problems through fitness functions and repeated evolution. As such, GP has several inherently parallel steps, making it an ideal candidate for GPU based parallelization. 
 
-In this thesis, implementation details involving the parallelization of stack-based Genetic Programming algorithms (more specifically, symbolic regression and transformation) on GPUs are explored. To achieve higher performance and scalability, we focus on parallelizing the selection and evaluation steps of the generational GP algorithm, through parallel tournament-based candidate selections, candidate expression-tree evaluation using a fixed size stack machine in GPU memory, and batching of fitness computations for whole program populations. 
-During program mutations, we restrict program depth by introducing a hoisted version of the crossover operation between a parent and a donor program. 
+In this thesis, we describe the implementation details of a parallel stack-based GP algorithm, to be used for the purpose of symbolic regression and transformation. To achieve higher performance and scalability, we parallelize the selection and evaluation step of the generational GP algorithm. 
+For the selection step, tournament selections are vectorized across the entire population using CUDA kernels. 
+Parallel evaluation is achieved by representing candidate expression ASTs using prefix lists, which are then evaluated using a fixed length stack in GPU memory.
+We also provide fully vectorized kernels to enable fast fitness computations for $6$ common loss functions. For mutations, a hoisted version of the crossover operation is also presented as a depth-conscious alternative to the traditional crossover operation.
 
-Our work then benchmarks the performance of the new parallel GP algorithm against other standard symbolic regression libraries implementing Symbolic Regression. 
-Our work then profiles the performance of the new parallel GP algorithm on Airfoil Self-Noise, Airline on-time performance and YearPredictionMSD datasets, and compares the results with other standard symbolic regression libraries and naive linear regression. 
-% The statement below will change after final benchmaks
-asdddddddddddddddddddddddddd
-Using nVidia Tesla V100 GPUs, average speedups of upto $10 \times$ were observed on the performance benchmarks of our algorithm against CPU-only implementations of the standard GP libraries.
-% \pagebreak
+We then run benchmarks on synthetic datasets (ranging in size from $4096$ to $4$ million rows) for the Pagie Polynomial, profiling execution times for our algorithm and other standard GP libraries. For our implementation, we also study the effect of the number of generations and dataset sizes on the best fitness value achieved using the Root Mean Square(RMS) metric. Finally, we also study the effect of increasing dataset sizes on walltimes taken by the evaluation step, in an effort to identify bottlenecks in our algorithm.
+
+Using Nvidia Turing GeForce GTX 1650 GPUs, average speedups of upto $27$x were observed on the performance benchmarks of our algorithm against gplearn, a CPU-only symbolic regression library. Using a $4$ million row dataset, our algorithm can fit a symbolic regressor with $50$ expression trees evolved for $50$ generations in less than $10$ seconds. 
+
+% JoJo - Dammit! Now that it has come to this, it is time to use the secret Joestar technique! 
+% Dio - NANI?? What is this? Did the Joestars develop some secret powers while I was away for the past 100 years? 
+% JoJo - Nigerundayo, Smokey!!!

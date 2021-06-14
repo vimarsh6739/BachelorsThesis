@@ -1,9 +1,9 @@
 \chapter{EXPERIMENTS}
 \label{chap:experiments}
 
-In this chapter, we will compare execution times of our algorithm's code(henceforth referred to as \textbf{cuML}) against some of the libraries mentioned in \cref{tab:otherlibs}, namely \textbf{gplearn}, \textbf{KarooGP}(only GPU), and \textbf{TensorGP}(both CPU and GPU). The evaluation time for each library is computed for synthetically generated 2D datasets of sizes ranging from $4096$ to $4$ million datapoints for an average over $10$ runs. 
+In this chapter, we will compare execution times of our algorithm's code(henceforth referred to as \textbf{cuML}) against some of the libraries mentioned in \cref{tab:otherlibs}, namely \textbf{gplearn}, \textbf{KarooGP}(only GPU), and \textbf{TensorGP}(only GPU). The evaluation time for each library is computed for synthetically generated 2D datasets of sizes ranging from $4096$ to $4$ million datapoints for an average over $10$ runs. 
 
-Before exploring the setup for the experiments, we note that field of GP, especially Symbolic Regression suffers from a lack of standardized benchmarks. This problem is explored by a few studies \citep{GP_Better_Benchmarks}\citep{Orzechowski_2018}, which attempt to quantify and list candidate GP problems. In our experiments, we try to follow the guidelines laid out in these studies.
+Before exploring the setup for the experiments, we note that field of GP, especially for Symbolic Regression suffers from a lack of standardized benchmarks. This problem is explored by a few studies \citep{GP_Better_Benchmarks}\citep{Orzechowski_2018}, which attempt to quantify and list candidate GP problems. In our experiments, we try to follow the guidelines laid out in these studies.
 
 Our experiments were motivated by \citep{baeta2021speed}, and follow a similar flow for testing execution times between different libraries. All experiments were carried out in a laptop with the spefications listed in \cref*{tab:laptop}.
 
@@ -18,7 +18,7 @@ Our experiments were motivated by \citep{baeta2021speed}, and follow a similar f
         GPU & Nvidia GeForce GTX 1650       \\
         RAM & 8 GB                          \\
         OS  & Ubuntu 20.04.2 LTS            \\
-        CUDA Toolkit Version& 11.2          \\
+        GPU-RAM& 4 GB          \\
         \bottomrule
       \end{tabular}
       \label{tab:laptop}
@@ -130,7 +130,7 @@ A total of $230$ runs were performed across the $4$ different libraries to produ
 \end{table}
 
 
-From \cref{tab:execavgs}, we note that cuML takes $6.4$ seconds on inputs of size $4$ million, wheras gplearn takes around $266.3$ seconds on the same input, after parallelization using $8$ jobs.
+From \cref{tab:execavgs}, we note that cuML takes $6.4$ seconds on inputs of size $4$ million, wheras gplearn takes around $266.3$ seconds on the same input, after parallelization using $8$ jobs. When taking a mean average of runtime across all datasets and runs, we achieve an average speedup of $27$x in training time with respect to gplearn, with a maximum speedup of $41$x in the $4$ million row dataset.
 
 Since KarooGP uses the TensorFlow \textit{graph} execution model, it is possible that more time is spent in building the execution DAG before evaluating it. In comparison, gplearn (which is already parallelized using $8$ jobs), uses numpy for fitness computations, which can exploit the AVX SIMD intructions on Intel CPUs to achieve greater parallelism. 
 
@@ -150,5 +150,30 @@ For cuML, \cref{fig:besttrainfit} showcases the variation of the fitness score o
 \end{figure}
 
 It is easy to notice that the $1$ million row test set displays a monotonically decreasing error with increasing number of generations. However, we notice that the overall fitness value doesn't decrease even with an increase in the total number of evaluation datapoints in the same domain. Using this, we can conclude that bigger and more granular datasets do not help if we are performing symbolic regression to find the Pagie Polynomial, a result in line with \citep{baeta2021speed}.
+
+\section{Evaluation Effects}
+\label{sec:evaleffects}
+In this section, we inspect the effect of cuML's execution kernel with respect to the percentage of GPU Time consumed. To do this, we use the command-line GPU profiler \textbf{nvprof}, which gives us a runtime summary of CUDA kernels memory transfers. \Cref{tab:nvprofexec} summarizes the amount of time spent by the execute kernel with respect to all GPU activities. 
+
+\begin{table}[htbp]
+  \caption{Summarizing the time spent by the execution kernel as a summary of all GPU activities across $10$ runs. All results were collected using the command line tool \textbf{nvprof}}
+  \begin{center}
+    \begin{tabular}[c]{cc}
+      \toprule
+      \textbf{Number of Rows} & \textbf{Execution Time (\%)} \\
+      \midrule
+      4096    & 32.20\\
+      16384   & 75.29\\
+      65536   & 70.84\\
+      262144  & 87.04\\ 
+      1048576 & 86.15\\
+      4194304 & 77.61\\
+      \bottomrule
+    \end{tabular}
+    \label{tab:nvprofexec}
+  \end{center}
+\end{table}
+
+The values in \cref*{tab:nvprofexec} indicate to us that the execution step is still the bottleneck in the run of the algorithm. Thus, on an average $71.52\%$ of GPU time is spent in the execution kernel.
 
 In the next chapter, we shall list out some conclusions and possible optimizations and feature additions to the current implementation of cuML. 
