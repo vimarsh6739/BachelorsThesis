@@ -161,6 +161,17 @@ For cuML, \cref{fig:besttrainfit} showcases the variation of the fitness score o
 
 It is easy to notice that the $1$ million row test set displays a monotonically decreasing error with increasing number of generations. However, we notice that the overall fitness value doesn't decrease even with an increase in the total number of evaluation datapoints in the same domain. Using this, we can conclude that bigger and more granular datasets do not help if we are performing symbolic regression to find the Pagie Polynomial, a result in line with \citep{baeta2021speed}.
 
+We take the analysis a bit further and examine the variation of fitness values for both gplearn and cuML on the $1$ million row dataset, since both libraries implement the same types of mutations. \Cref{fig:gplearnvscuML1mil} visualizes this variation. We note that both cuML and gplearn exhibit similar behaviour with respect to non-increasing fitness values with increasing number of generations. 
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.59]{images/RMSErrorGPLEARN.pdf}
+  \caption{Plotting the variation of the best tree fitness(during training) with number of generations for both cuML and gplearn. The fitness values correspond of the $1$ million row dataset for both libraries.}
+  \label{fig:gplearnvscuML1mil}
+\end{figure}
+
+We note that \cref{fig:gplearnvscuML1mil} \textbf{cannot} be used to determine which library produces better results for symbolic regression in general. This is because the final fitness value achieved is highly sensitive to the initialization of programs, which is randomized. Rather, the only goal of \cref*{fig:gplearnvscuML1mil} is to help us verify similar convergence behaviour of fitness values for both gplearn and cuML on the same datasets, when initialized with the same hyperparameters.
+
 \subsection{Evaluation Effects}
 \label{sec:evaleffects}
 In this section, we inspect the effect of cuML's execution kernel with respect to the percentage of GPU Time consumed. To do this, we use the command-line GPU profiler \textbf{nvprof}, which gives us a runtime summary of CUDA kernels memory transfers. \Cref{tab:nvprofexec} summarizes the amount of time spent by the execute kernel with respect to all GPU activities. 
