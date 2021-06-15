@@ -1,7 +1,7 @@
 \chapter{EXPERIMENTS}
 \label{chap:experiments}
 
-In this chapter, we will compare execution times of our algorithm's code(henceforth referred to as \textbf{cuML}) against some of the libraries mentioned in \cref{tab:otherlibs}, namely \textbf{gplearn}, \textbf{KarooGP}(only GPU), and \textbf{TensorGP}(only GPU). The evaluation time for each library is computed for synthetically generated 2D datasets of sizes ranging from $4096$ to $4$ million datapoints for an average over $10$ runs. 
+In this chapter, we will compare execution times of our algorithm's code(henceforth referred to as \textbf{cuML}) against some of the libraries mentioned in \cref{tab:otherlibs}, namely \textbf{gplearn}, \textbf{KarooGP}(only GPU), and \textbf{TensorGP}(both CPU and GPU). The evaluation time for each library is computed for synthetically generated 2D datasets of sizes ranging from $4096$ to $4$ million datapoints for an average over $10$ runs. 
 
 Before exploring the setup for the experiments, we note that field of GP, especially for Symbolic Regression suffers from a lack of standardized benchmarks. This problem is explored by a few studies \citep{GP_Better_Benchmarks}\citep{Orzechowski_2018}, which attempt to quantify and list candidate GP problems. In our experiments, we try to follow the guidelines laid out in these studies.
 
@@ -96,7 +96,7 @@ Note that this kind of analysis isn't possible for the other libraries, since ea
 
 \section{Experimental Results}
 \label{sec:results}
-A total of $230$ runs were performed across the $4$ different libraries to produce the results in this section. We compare the average execution time for $10$ runs on $4096$ to $4$ million datapoints, followed by an analysis of the evolution of fitness for both cuML and gplearn.
+A total of $290$ runs were performed across the $5$ different GP libraries to produce the results in this section. We compare the average execution time for $10$ runs on $4096$ to $4$ million datapoints, followed by an analysis of the evolution of fitness for both cuML and gplearn.
 
 \subsection{Execution Time}
 \label{subsec:exectimes}
@@ -110,31 +110,41 @@ A total of $230$ runs were performed across the $4$ different libraries to produ
 \end{figure}
 
 \begin{table}[htbp]
-  \caption{Table containing mean and standard deviation for Execution Times across $10$ runs in milliseconds across different libraries. NaN denotes that the test didn't complete in time}
+  \caption{Table containing mean and standard deviation of execution time across $10$ runs in milliseconds across different libraries. NaN denotes that the test took more than $2$ hours to complete}
   \begin{adjustbox}{width=\columnwidth,center}
-    \begin{tabular}{r|rrrrrrrr}
+    \begin{tabular}{llrrrrrr}
       \toprule
-      \# Rows & \multicolumn{2}{c}{cuML} & \multicolumn{2}{c}{gplearn} & \multicolumn{2}{c}{KarooGP} & \multicolumn{2}{c}{TensorGP} \\
-              &    mean &   std &      mean &     std &      mean &      std &     mean &    std \\
+      \textbf{\# Rows} & {} &  4096 & 16384 & 65536 & 262144 & 1048576 & 4194304 \\
       \midrule
-         4096 &   86.92 &  0.60 &   2761.76 &  528.24 &  46628.83 &  8706.63 &  2926.20 & 157.08 \\
-        16384 &  144.35 &  6.27 &   2778.81 &  405.48 &  48079.62 &  7253.72 &  4236.78 &  81.59 \\
-        65536 &  188.84 &  8.34 &   4484.50 &  305.91 &  49489.57 &  7696.79 &  4147.59 &  61.61 \\
-       262144 &  843.21 & 11.49 &  19593.88 &  433.91 &  81830.44 & 11818.43 &  6107.87 & 135.50 \\
-      1048576 & 2598.17 & 18.51 &  59786.29 &  718.06 & 299534.68 & 11527.51 &  9298.63 & 219.44 \\
-      4194304 & 6447.31 & 25.29 & 266294.33 & 6096.38 &       NaN &      NaN & 26983.58 & 264.13 \\
+      \textbf{cuML} & mean &    86.92 &   144.35 &   188.84 &    843.21 &    2598.17 &    6447.31 \\
+      & std &     0.60 &     6.27 &     8.34 &     11.49 &      18.51 &      25.29 \\
+      \midrule
+      \textbf{gplearn} & mean &  2761.76 &  2778.81 &  4484.50 &  19593.88 &   59786.29 &  266294.33 \\
+      & std &   528.24 &   405.48 &   305.91 &    433.91 &     718.06 &    6096.38 \\
+      \midrule
+      \textbf{KarooGP} & mean & 46628.83 & 48079.62 & 49489.57 &  81830.44 &  299534.68 &        NaN \\
+      & std &  8706.63 &  7253.72 &  7696.79 &  11818.43 &   11527.51 &        NaN \\
+      \midrule
+      \textbf{TensorGP(GPU)} & mean &  2926.20 &  4236.78 &  4147.59 &   6107.87 &    9298.63 &   26983.58 \\
+      & std &   157.08 &    81.59 &    61.61 &    135.50 &     219.44 &     264.13 \\
+      \midrule
+      \textbf{TensorGP(CPU)} & mean &  2397.36 &  5303.11 &  6773.76 &  23515.70 &  137527.62 &  489625.81 \\
+      & std &    72.89 &   115.62 &    38.57 &    223.69 &     414.81 &    2055.17 \\
       \bottomrule
-      \end{tabular}
+      \end{tabular}      
     \label{tab:execavgs}
   \end{adjustbox}
 \end{table}
 
-
-From \cref{tab:execavgs}, we note that cuML takes $6.4$ seconds on inputs of size $4$ million, wheras gplearn takes around $266.3$ seconds on the same input, after parallelization using $8$ jobs. When taking a mean average of runtime across all datasets and runs, we achieve an average speedup of $27$x in training time with respect to gplearn, with a maximum speedup of $41$x in the $4$ million row dataset.
+From \cref*{tab:execavgs}, we note that cuML takes $6.4$ seconds on inputs of size $4$ million, wheras gplearn takes around $266.3$ seconds on the same input, after parallelization using $8$ jobs. When taking a mean average of runtime across all datasets and runs, we achieve an average speedup of $27$x in training time with respect to gplearn, with a maximum speedup of $41$x in the $4$ million row dataset.
 
 Since KarooGP uses the TensorFlow \textit{graph} execution model, it is possible that more time is spent in building the execution DAG before evaluating it. In comparison, gplearn (which is already parallelized using $8$ jobs), uses numpy for fitness computations, which can exploit the AVX SIMD intructions on Intel CPUs to achieve greater parallelism. 
 
-In comparision, we can easily see that TensorGP, which uses the TensorFlow \textit{eager} execution model runs much faster on bigger inputs compared to KarooGP or gplearn. However, none of the other libraries are as fast as cuML, which also vectorizes fitness computation across populations, reducing training time on $4$ million rows to less than $10$ seconds.
+We believe that this job based parallelization again explains why gplearn is faster than TensorGP(CPU) - which is also optimized to utilize AVX SIMD instructions using TensorFlow's CPU backend.
+
+From the graph in \cref*{fig:exectimes}, as well as \cref*{tab:execavgs}, we see that the TensorGP(GPU) approach consistently beats gplearn, KarooGP and TensorGP(CPU) on datasets with more than $65536$ points. Since TensorGP(GPU) uses TensorFlow's GPU backend with eager execution, time is not spent in building an optimized computation DAG for every program. This in turn increases the speed of parallel evaluation.
+
+When comparing cuML to the rest of the libraries in \cref{fig:exectimes} and \cref{tab:execavgs}, we note that cuML is the fastest among all libraries on all inputs. We are faster than TensorGP(GPU) also, since cuML batches the computation of fitness across the entire population and dataset. 
 
 \subsection{Variation of Fitness}
 \label{subsec:fitnessvar}
@@ -145,13 +155,13 @@ For cuML, \cref{fig:besttrainfit} showcases the variation of the fitness score o
 \begin{figure}[htbp]
   \centering
   \includegraphics[scale=0.59]{images/RMSError.pdf}
-  \caption{Plot showcasing the variation of Root Mean Square(RMS) error of with the number of generations. The error value corresponds to the fitness value of the optimal tree in every generation. These results correspond to that of the cuML library. }
+  \caption{Plot showcasing the variation of Root Mean Square(RMS) error of with the number of generations. The error value corresponds to the fitness value of the optimal tree in every generation. }
   \label{fig:besttrainfit}
 \end{figure}
 
 It is easy to notice that the $1$ million row test set displays a monotonically decreasing error with increasing number of generations. However, we notice that the overall fitness value doesn't decrease even with an increase in the total number of evaluation datapoints in the same domain. Using this, we can conclude that bigger and more granular datasets do not help if we are performing symbolic regression to find the Pagie Polynomial, a result in line with \citep{baeta2021speed}.
 
-\section{Evaluation Effects}
+\subsection{Evaluation Effects}
 \label{sec:evaleffects}
 In this section, we inspect the effect of cuML's execution kernel with respect to the percentage of GPU Time consumed. To do this, we use the command-line GPU profiler \textbf{nvprof}, which gives us a runtime summary of CUDA kernels memory transfers. \Cref{tab:nvprofexec} summarizes the amount of time spent by the execute kernel with respect to all GPU activities. 
 
