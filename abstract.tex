@@ -20,7 +20,7 @@ We also provide fully vectorized kernels to enable fast fitness computations for
 
 We then run benchmarks on synthetic datasets (ranging in size from $4096$ to $4$ million rows) for the Pagie Polynomial, profiling execution times for our algorithm and other standard GP libraries. For our implementation, we also study the effect of the number of generations and dataset sizes on the best fitness value achieved using the Root Mean Square(RMS) metric. Finally, we also study the effect of increasing dataset sizes on walltimes taken by the evaluation step, in an effort to identify bottlenecks in our algorithm.
 
-Using Nvidia Turing GeForce GTX 1650 GPUs, average speedups of upto $27$x were observed on the performance benchmarks of our algorithm against gplearn, a CPU-only symbolic regression library. Using a $4$ million row dataset, our algorithm can fit a symbolic regressor with $50$ expression trees evolved for $50$ generations in less than $10$ seconds. 
+Using Nvidia Turing GeForce GTX 1650 GPUs, average speedups of upto $27$x were observed on the performance benchmarks of our algorithm against gplearn, a CPU-only symbolic regression library. On a $4$ million row synthetic dataset, our algorithm can fit a symbolic regressor with $50$ expression trees evolved for $50$ generations in less than $10$ seconds. 
 
 % JoJo - Dammit! Now that it has come to this, it is time to use the secret Joestar technique! 
 % Dio - NANI?? What is this? Did the Joestars develop some secret powers while I was away for the past 100 years? 
