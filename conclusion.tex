@@ -1,12 +1,12 @@
 \chapter{CONCLUSION AND FUTURE WORK}
 \label{chap:conclusion}
-In this chapter, we summarize some of the experimental results of \cref*{chap:experiments}, as well as provide an outline for further improvements, both with respect to optimizations and new features.
+In this chapter, we summarize some experimental results of \Cref{chap:experiments}, as well as provide an outline for further improvements, both with respect to optimizations and new features.
 
 \section{Summary of Results}
 \label{sec:summary}
-In this work, we attempt to accelerate genetic programming based algorithms, for symbolic regression and transformation on the GPU. We do this by parallelizing the selection and evaluation step of the generational GP algorithm. We introduce a prefix-list representation for expression trees, which are then evaluated using an optimized stack on the GPU. We also implement fully vectorized routines for standard loss functions, which can be used as fitness functions during the training of a genetic population of programs. At the end of a run, our algorithm returns the entire set of evolved programs for all generations. One can filter the most optimal program from the last generation of programs, or the programs with maximum variation(based on fitness values) to perform symbolic regression or transformation respectively. 
+In this work, we attempt to accelerate genetic programming based algorithms, for symbolic regression and transformation on the GPU. We do this by parallelizing the selection and evaluation step of the generational GP algorithm. We introduce a prefix-list representation for expression trees, which are then evaluated using an optimized stack on the GPU. Fully vectorized routines for standard loss functions are also provided, which can be used as fitness functions during the training of a genetic population of programs. At the end of a run, our algorithm returns the entire set of evolved programs for all generations. One can filter the most optimal program from the last generation of programs, or the programs with maximum variation (based on fitness values) to perform symbolic regression or transformation respectively. 
 
-On synthetic datasets for the Pagie Polynomial ranging in size from $4000$ to $4$ million points, we were able to achieve average speedups of $27$x with respect to gplearn, a library our implementation takes inspiration from. Our algorithm evolves a set of $50$ programs for $50$ generations on a $4$ million rows in less than $10$ seconds. 
+On synthetic datasets for the Pagie Polynomial ranging in size from $4000$ to $4$ million points, we were able to achieve average speed-ups of $27\times$ with respect to gplearn\citep{gplearn}, a library our implementation takes inspiration from. Our algorithm evolves a set of $50$ programs for $50$ generations on a $4$ million rows in less than $10$ seconds. 
 % Even the secret Joestar technique can't compare to this lol
 
 \section{Further Improvements}
@@ -19,7 +19,7 @@ In our experiments, we found that for large datasets, maximum amount of GPU time
 
 We note that as long as an exact copy of the population program exists, it doesn't matter if the representation of the program slightly changes on the device. Keeping this in mind, one can attempt to reduce the average depth of the trees being evaluated by performing some balancing on the device trees(while still maintaining the prefix order for all expressions). This will help in the evaluation step, as lesser stack slots will be used for a small-depth balanced tree compared to a larger depth unbalanced tree, leading to lower kernel stack memory usage per thread. However, we note that implementing tree balancing in the GPU is a non-trivial task.
 
-Note that another optimization approach is to convert the current prefix-tree into a DAG to cache values of common subexpressions. However, in this case, the evaluation of the underlying tree itself changes. 
+Note that another optimization approach is to convert the current prefix-tree into a DAG to cache values of common sub-expressions. However, in this case, the evaluation method of the underlying tree itself changes. 
 
 \subsection{New Features}
 \label{subsec:newfeatures}
@@ -29,7 +29,7 @@ Our implementation of genetic programming in cuML lacks a few features compared 
 \subsubsection{Supporting custom function sets}
 Our current implementation of genetic programming in cuML provides a constant list of $33$ functions. We don't expose any way for users to define their own custom functions for use during evolution. 
 
-Support for this can be added through the use of \lstinline!__host__ __device__! function pointers. The user can specify a list of function pointers as hyperparameters. During the stack execution phase, the specified function pointer is called at runtime for evaluation.
+Support for this can be added through the use of \lstinline!__host__ __device__! function pointers. The user can specify a list of function pointers as training hyper parameters. During the stack execution phase, the specified function pointer is called at runtime for evaluation.
 
 \subsubsection{Custom Loss functions}
 

@@ -1,4 +1,4 @@
-\chapter{OUR WORK}
+\chapter{OUR PARALLEL GP MODEL}
 \label{chap:ourwork}
 This chapter contains the implementation details of our parallel algorithm to perform genetic programming using CUDA. We first talk about a way to represent programs on the GPU. This is then followed by a description of the device side data structures used. We then give an overview of our modified GP algorithm, describing GPU-side optimizations for the selection, and evaluation step in detail. We also include details about the fitness computation step which comes after the evaluation step. Finally, we talk about the various challenges faced during the implementation of the modified algorithm, and the workarounds to avoid these problems.
 
@@ -8,13 +8,36 @@ In this implementation, we use a fixed list of functions with a maximum arity of
 \label{ow:input}
 We define a struct for a program containing the following components. 
 \begin{itemize}
-    \item A array of operators and operands of the underlying expression tree stored in Polish(prefix) notation.
+    \item An array of operators and operands of the underlying expression tree stored in Polish(prefix) notation.
     \item A length parameter corresponding to the total number of nodes in the expression tree. 
     \item A raw fitness parameter containing the score of the current tree on the input data-set. 
     \item The depth of the current expression tree. 
 \end{itemize}
 
-The entire population for a given generation is thus stored in the Array of Structures(AoS) format. The evaluation using a stack is almost similar to the way the Push3 system \citep{push3Stack} evaluates GP programs, with the sole exception being the reverse iteration due to the prefix notation chosen for the trees. 
+\Cref{lst:programstruct} shows the internal definition of the program struct used in our code. \lstinline!nodes! here is the prefix list used to store the nodes of the underlying AST. The content of \lstinline!nodes! is decided through the mutation step. Evaluation and fitness computations are used for the computation of the \lstinline!raw_fitness_! field.
+
+\begin{lstlisting}[caption={Our code for the program struct, representing a single expression tree. This entire structure is copied over and evaluated on the GPU.},label={lst:programstruct}]
+struct program {
+  explicit program();
+  ~program();
+  explicit program(const program &src);
+  program &operator=(const program &src);
+
+  node *nodes;
+  /** total number of nodes in this AST */
+  int len;
+  /** maximum depth of this AST */
+  int depth;
+  /** fitness score of current AST */
+  float raw_fitness_;
+  /** fitness metric used for current AST*/
+  metric_t metric;
+  /** mutation type responsible for production */
+  mutation_t mut_type;
+};  // struct program
+\end{lstlisting}
+
+The entire population for a given generation is thus stored in an Array of Structures(AoS) format. The evaluation using a stack is almost similar to the way the Push3 system \citep{push3Stack} evaluates GP programs, with the sole exception being the reverse iteration due to the prefix notation chosen for the trees. 
 
 Prefix notation was used for the representation of nodes to aid with the process of generating random programs, where we directly generate a valid prefix tree on the CPU.
 
@@ -22,22 +45,22 @@ Prefix notation was used for the representation of nodes to aid with the process
 \label{ow:deviceds}
 In order to perform tournament selection and evaluation on the GPU, we use the following device side data-structures. 
 \begin{itemize}
-    \item \textbf{Philox Random Number Generator(RNG)} - We use a Philox counter-based RNG\citep{Philox2011} implemented in the {\bf raft} library \citep{raschka2020machine} to generate random global indices for tournament selection inside the selection kernel. 
-    \item \textbf{Fixed size device stack} - We define a fixed size stack using a custom class, implementing the \textit{push}, \textit{pop} methods as inline \lstinline!__host__ __device__! functions. To avoid global memory accesses and encourage register look-ups for internal stack slots, the push and pop operation is implemented using an unrolled loop over all the available slots. This action is possible because the maximum size of the stack is fixed at $20$ for now. We shall discuss more about this in \cref{sec:challenges}, where we examine how to avoid thread divergence in this setup.
+    \item \textbf{Philox Random Number Generator(RNG)} - We use a Philox counter-based RNG\citep{Philox2011} implemented in the {\bf raft} library\citep{raschka2020machine} to generate random global indices for tournament selection inside the selection kernel. 
+    \item \textbf{Fixed size device stack} - We define a fixed size stack using a custom class, implementing the \textit{push}, \textit{pop} methods as inline \lstinline!__host__ __device__! functions. To avoid global memory accesses and encourage register look-ups for internal stack slots, the push and pop operation is implemented using an unrolled loop over all the available slots. This action is possible because the maximum size of the stack is fixed at $20$ for now. We shall discuss more about this in \Cref{sec:challenges}, where we examine how to avoid thread divergence in this setup.
 \end{itemize}
 
-Our kernels for both selection and program execution have been written in a way so as to eliminate any need for thread or memory synchronization. 
+Our kernels for both selection and program execution have been written in a way to eliminate any need for thread or memory synchronization. 
 
 \subsection{Memory Footprint}
 \label{ow:memory}
 We examine the memory footprint of our implementation with respect to the number of programs stored in both CPU and GPU memory below. 
 \begin{itemize}
-    \item \textbf{CPU} - Depending on a user-specified flag, we maintain a history of all the programs for all generations. If this is not desired, then we only store information about $2$ generations, the current and the next generation until the end.
-    \item \textbf{GPU} - Only the device memory corresponding to the current and the next generation of programs is stored through the run of the algorithm. During the course of the algorithm, the $2$ memory locations are updated with new programs in a ping pong fashion.
+    \item \textbf{CPU} --- Depending on a user-specified flag, we maintain a history of all the programs for all generations. If this is not desired, then we only store information about $2$ generations, the current and the next generation until the end.
+    \item \textbf{GPU} --- Only the device memory corresponding to the current and the next generation of programs is stored through the run of the algorithm. During the course of the algorithm, the $2$ memory locations are updated with new programs in a ping pong fashion.
 \end{itemize}
 
-We will now explain our code for implementing parallel GP in \cref*{ow:paralgo}.
-\section{Our Parallel GP Algorithm}
+We will now explain our code for implementing parallel GP in \Cref*{ow:paralgo}.
+\section{The Parallel GP Algorithm}
 \label{ow:paralgo}
 In this section, we again outline the individual steps of \Cref{gpalgo}, defined in \Cref{bgrw:algo}. However, each step contains details specific to our implementation. In this implementation, the selection and evaluation step is performed on the GPU, whereas mutations are carried out on the CPU.
 
@@ -47,7 +70,7 @@ Once exact number of tournaments has been decided, we move on to the selection s
 
 \subsection{Selection}
 \label{ow:selection}
-We perform selection by running parallel tournaments in a CUDA kernel. For a population of size $n$ and tournament subset size $k$, we launch a CUDA kernel with $\left\lfloor n/256 \right\rfloor $ blocks and $256$ threads.In each thread, we generate $k$ random program indices using a Philox RNG(see \cref{ow:deviceds}). 
+We perform selection by running parallel tournaments in a CUDA kernel. For a population of size $n$ and tournament subset size $k$, we launch a CUDA kernel with $\left\lfloor n/256 \right\rfloor $ blocks and $256$ threads. In each thread, we generate $k$ random program indices using a Philox RNG(see \cref{ow:deviceds}). 
 
 The index of the best program among the $k$ indices (based on the raw fitness values of the device programs) is then chosen as the winning index for the given thread, and is recorded in a \lstinline!win_indices! array.
 
@@ -57,11 +80,11 @@ The mutation of programs takes place on the CPU itself. We implement all the mut
 
 \subsubsection{Hoisted Crossover}
 
-In this mutation, we initially perform a crossover between the parent tree and the donor tree. The selected stubtree of the donor is then repeatedly hoisted onto the parent tree until the depth of the resultant tree is less than the maximum evaluation stack size. \\
+In this mutation, we initially perform a crossover between the parent tree and the donor tree. The selected subtree of the donor is then repeatedly hoisted onto the parent tree until the depth of the resultant tree is less than the maximum evaluation stack size. \\
 Note that the hoist mutation occurs only on the donor sub-tree, since that is the part of the tree which contributes to the depth violation. If this was not the case, then another sub-tree of the parent sub-tree would have contributed towards the max depth violation, making the parent program itself an invalid one. \\
 This modification is necessary for our code since a stack of fixed size $m$ can only evaluate a tree of depth $m-1$(assuming the maximum function arity is $2$)
 
-At the end of mutations, we allocate and transfer the newly created programs onto GPU memory, in order to evaluate them on the input data-set. In order to save on device memory, we also deallocate the GPU memory of the previous population trees. Some of the challenges we faced due to the nested nature of programs during the \lstinline!cudaMemcpy! operations between host and device memory are listed in \cref{sec:challenges}. 
+At the end of mutations, we allocate and transfer the newly created programs onto GPU memory, in order to evaluate them on the input data-set. In order to save on device memory, we also deallocate the GPU memory of the previous population trees. Some of the challenges we faced due to the nested nature of programs during the \lstinline!cudaMemcpy! operations between host and device memory are listed in \Cref{sec:challenges}. 
 
 \subsection{Evaluation}
 \label{ow:evaluation}
@@ -69,9 +92,9 @@ We divide the evaluation portion into $2$ steps, namely execution and metric com
 
 \subsubsection{Execution}
 \label{subsec:execute}
-For every program in the population and every sample in the input dataset, we produce predicted output values in this step. If $n$ is the population size, and $m$ is the number of samples in the input dataset, then we launch an execution kernel with a 2D grid of dimension $(\left\lceil m/256\right\rceil ,n)$ with $256$ threads per block. Each thread has it's own device side stack which evaluates a program on a specific row.
+For every program in the population and every sample in the input dataset, we produce predicted output values in this step. If $n$ is the population size, and $m$ is the number of samples in the input dataset, then we launch an execution kernel with a 2D grid of dimension $(\left\lceil m/256\right\rceil ,n)$ with $256$ threads per block. Each thread has its own device side stack which evaluates a program on a specific row.
 
-We note here that to avoid thread divergence in the execution kernel, it is important to ensure that each block of threads execute on different rows of the same program. We provide more details about this in \cref*{sec:challenges}.
+We note here that to avoid thread divergence in the execution kernel, it is important to ensure that each block of threads execute on different rows of the same program. We provide more details about this in \Cref{sec:challenges}.
 
 \subsubsection{Fitness Metric Computation}
 \label{subsec:fitness}
@@ -88,12 +111,11 @@ Since the fitness computation is the same for all programs, we computed loss for
     \item Karl Pearson's Correlation Coefficient
     \item Spearman's Rank Correlation Coefficient
 \end{itemize}
-During the implementation of Spearman Rank Correlation, we used the \textbf{thrust} library from Nvidia to generate ranks for the given values. The default fitness function is set as MAE, in an effort to be consistent with \textbf{gplearn} \citep{gplearn}
+During the implementation of Spearman Rank Correlation, we used the \textbf{thrust} library from Nvidia to generate ranks for the given values. The default fitness function is set as MAE, in an effort to be consistent with gplearn\citep{gplearn}.
 
 \section{Challenges Faced}
 \label{sec:challenges}
-In this section, we detail in brief some of the challenges faced during the implementation of our parallel GP algorithm.
-
+In this section, we briefly talk about some challenges faced during the implementation of our parallel GP algorithm.
 
 \subsection{Thread divergence and Global Memory Access}
 \label{prob:divergence}
@@ -112,8 +134,3 @@ Since we went with a AoS representation for the list of programs and each progra
 Since all our computations are ordered on a single CUDA stream, transferring programs back and forth the device in a loop slows down the overall time for training. However, in our experiments, we observed that the dominant contributor to execution time was the evaluation step, and not memory transfers. Thus, the implementation was not altered.
 
 In the next chapter, we will describe some benchmark experiments and present our results. 
-
-
-
-
-

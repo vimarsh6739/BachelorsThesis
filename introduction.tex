@@ -1,27 +1,28 @@
 \chapter{INTRODUCTION} \label{chap:intro}
-In recent years, there has been a widespread increase in the use of GPUs in the field of machine learning and deep learning, because of their ability to massively speedup the training of models. This is mainly due to the large parallel processing ability of GPUs, which can process multiple inputs using SIMD intrinsics. Genetic Programming(GP) is an class of a machine algorithms with several inherent parallel steps. As such, it is an ideal domain for GPU based parallelization. 
+In recent years, there has been a widespread increase in the use of GPUs in the field of machine learning and deep learning, because of their ability to massively speedup the training of models. This is mainly due to the large parallel processing ability of GPUs, which can process multiple inputs using SIMD intrinsics. Genetic Programming(GP) is a class of machine algorithms with several inherent parallel steps. As such, it is an ideal domain for GPU based parallelization. 
 
 \section{The Problem}
 \label{intro:problem}
-Genetic  Programming is a technique which involves evolving a set of programs based on the principles of genetics and natural selection. It is a generalized heuristic search technique, which searches for a least suitable program optimizing a given fitness function. 
-As such it has applications ranging from machine learning to code synthesis.\citep{Koza92} It also supports a meta-evolutionary framework, where a GP system itself can be evolved using GP.\citep{schaul2010metalearning}
+Genetic  Programming is a technique which involves evolving a set of programs based on the principles of genetics and natural selection. It is a generalized heuristic search technique, which searches for the best program optimizing a given fitness function. 
+As such it has applications ranging from machine learning to code synthesis\citep{Koza92}. It also supports a meta-evolutionary framework, where a GP system itself can be evolved using GP\citep{schaul2010metalearning}.
 
-However, in practice, it is difficult to scale GP algorithms. Fitness evaluation of candidate programs in GP algorithms is a well-known bottleneck and there are multiple previous attempts to overcome this problem - either through parallelization of the evaluation step(\citep{10.1007/978-3-540-71605-1_9},\citep{baeta2021tensorgp},\citep{DEAP_JMLR2012},\citep{gplearn},\citep{staats2017tensorflow}), or by eliminating the need for fitness computations itself through careful initialization and controlled evolution.\citep{biles2001autonomous}
+However, in practice, it is difficult to scale GP algorithms. Fitness evaluation of candidate programs in GP algorithms is a well-known bottleneck and there are multiple previous attempts to overcome this problem - either through parallelization of the evaluation step\citep{10.1007/978-3-540-71605-1_9,baeta2021tensorgp,DEAP_JMLR2012,gplearn,staats2017tensorflow}, or by eliminating the need for fitness computations itself through careful initialization and controlled evolution\citep{biles2001autonomous}.
 
 \section{Our Contributions}
 \label{intro:contrib} 
-In this thesis, we provide details about a parallelized version of the generational GP algorithm to the solve the problems of Symbolic Regression and Transformation. We use a stack-based GP algorithm for simplified program evaluation(inspired by \citep{perkis}). Our algorithm can also be used to train symbolic binary-classifiers, where the classifier's output corresponds to the estimated equation of the decision boundary. 
+In this thesis, we provide details about a parallelized version of the generational GP algorithm to solve the problems of Symbolic Regression and Transformation. We use a stack-based GP algorithm for simplified program evaluation(inspired by \citep{perkis}). Our algorithm can also be used to train symbolic binary-classifiers, where the classifier's output corresponds to the estimated equation of the decision boundary. 
 
 Our main contributions are listed below:
 \begin{itemize}
-  \item We parallelize the selection and evaluation step of the generational GP algorithm, by conducting parallel tounaments and vectorizing evaluation across the dataset as well as the candidate population. 
-  \item We introduce a prefix-tree based Array of Structures (AoS) representation for candidate programs, along with a CUDA kernel to execute all programs on a dataset using a thread-local stack optimzed for memory access. 
+  \item We parallelize the selection and evaluation step of the generational GP algorithm, by conducting parallel tournaments and vectorizing evaluation across the dataset as well as the candidate population. 
+  \item We introduce a prefix-tree based Array of Structures (AoS) representation for candidate programs, along with a CUDA kernel to execute all programs on a dataset using a thread-local stack optimized for memory access. 
   \item We also provide a new method to perform tournaments for program selection in parallel using random numbers generated inside the GPU. 
-  \item We then benchmark the time taken for program evaluation by our algorithm against other standard libraries like gplearn\citep{gplearn} and TensorGP\citep{baeta2021tensorgp}. We provide a study of the effect of population size and dataset size on the final time taken for training. We also show the results of executing our algorithm on synthetic datasets for the Pagie Polynomial\cite{Pagie1997}
+  \item Execution time benchmarks for program evaluation for our algorithm are then provided. The same benchmarks are also run on other standard libraries like gplearn\citep{gplearn} and TensorGP\citep{baeta2021tensorgp}, for comparing training speeds. We then study the effect of population size and dataset size on the final time taken for training. We also conduct a brief analysis of the results of executing our algorithm on synthetic datasets for the Pagie Polynomial\cite{Pagie1997}.
 \end{itemize}
 
 % YOU FELL FOR IT FOOL! THUNDER CROSS SPLIT ATTACK
-The code for our algorithm is a part of the cuML library\citep{raschka2020machine}, which is a part of the RAPIDS suite of open source libraries maintained by Nvidia Corporation.
+The code for our algorithm is a part of the cuML library\citep{raschka2020machine}, a library intended to be a GPU accelerated version of the scikit-learn
+library\citep{scikit-learn}. The library is a part of the RAPIDS suite of open source libraries maintained by Nvidia Corporation.
 
 \section{Outline}
 \label{intro:outline}

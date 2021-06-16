@@ -2,20 +2,20 @@
 \label{chap:bgrw}
 In this chapter, we describe in detail the generational GP algorithm(\citep{poli08:fieldguide},\citep{RFIgp2016}), which serves as a base for our parallelization experiments in \Cref*{chap:ourwork}. Later on, we also give a brief description of existing work which also parallelizes this algorithm.
 
-Note that throughout this chapter, the terms program and expression tree are interchangable, since we are using GP for symbolic regression. 
+Note that throughout this chapter, the terms program and expression tree are interchangeable, since we are using GP for symbolic regression. 
 
 \section{The Generational GP Algorithm}
 \label{bgrw:algo}
 The generational GP algorithm gives us a method to evolve candidate programs using the principles of natural selection. There are $3$ main steps involved in the algorithm. 
 \begin{itemize}
-  \item Selection - In this step, we decide on a set of programs to evolve into the next generation, using a selection criterion. 
-  \item Mutation - Before promoting the programs selected in the previous step to the next generation, we perform some genetic operations on them. 
-  \item Evaluation - We again evaluate the mutated programs on the input dataset to recompute fitness scores. 
+  \item Selection --- In this step, we decide on a set of programs to evolve into the next generation, using a selection criterion. 
+  \item Mutation --- Before promoting the programs selected in the previous step to the next generation, we perform some genetic operations on them. 
+  \item Evaluation --- We again evaluate the mutated programs on the input dataset to recompute fitness scores. 
 \end{itemize}
 
-\Cref{gpalgo} formalizes the above $3$ steps. The initial set of programs is usually randomly generated. The termination criterion defined in \cref*{gpalgoendloop} of the algorithm is usually activated when the number of generations reaches a maximum limit or the an early convergence is reached on the given input dataset (usually governed by a user-specified threshold on fitness).
+\Cref{gpalgo} formalizes the above $3$ steps. The initial set of programs is usually randomly generated. The termination criterion defined in \Cref*{gpalgoendloop} of the algorithm is usually activated when the number of generations reaches a maximum limit or an early convergence is reached on the given input dataset (usually governed by a user-specified threshold on fitness).
 
-In \cref*{subsec:selection} to \cref*{subsec:evaluation}, we dive deep into the selection, mutation and execution steps of the generational GP agorithm. In \cref*{subsec:mutation}, we define and implement $4$ different possible types of mutation along with reproduction.
+In \Cref*{subsec:selection} to \Cref*{subsec:evaluation}, we dive deep into the selection, mutation and execution steps of the generational GP algorithm. In \Cref*{subsec:mutation}, we define and implement $4$ different possible types of mutation along with reproduction.
 
 
 \begin{algorithm}
@@ -36,11 +36,11 @@ In \cref*{subsec:selection} to \cref*{subsec:evaluation}, we dive deep into the 
   \end{algorithmic}
 \end{algorithm}
 
-Before going into selection, we first talk about initialization methods for the first generation programs. There are $3$ standard initialization techniques \citep{Koza92},\citep{luke:2000:2ftcaGP}
+Before going into selection, we first talk about initialization methods for the first generation programs. There are $3$ standard initialization techniques \citep{Koza92},
 \begin{itemize}
-    \item \textbf{Full initialization} - All trees in the current generation are "dense", that is, only leaf nodes are terminals(variables or constants).
-    \item \textbf{Grow initialization} - All trees grown in the current generation need not be "dense", and some of the non-leaf nodes can also be terminals. 
-    \item \textbf{Ramped half and half} - Half of the population trees are initialized using the Full method, and the other half is initialized using the Grow method. This is the most common method used for initializing programs.
+    \item \textbf{Full initialization} --- All trees in the current generation are \say{dense}, that is, only leaf nodes are terminals(variables or constants).
+    \item \textbf{Grow initialization} --- All trees grown in the current generation need not be \say{dense}, and some non-leaf nodes can also be terminals. 
+    \item \textbf{Ramped half-and-half} --- Half of the population trees are initialized using the Full method, and the other half is initialized using the Grow method. This is the most common method used for initializing programs.
 \end{itemize}
 
 In addition to the above $3$ methods, we note that there are other initialization algorithms which grant the user more control over tree initialization with respect to tree depth and node probabilities\citep{luke:2000:2ftcaGP}.
@@ -50,13 +50,13 @@ However, we provide support only for the $3$ standard initialization methods in 
 \label{subsec:selection}
 Selection is the step where individual candidates from a given population are chosen for evolution into the next generation. Some commonly used selection schemes are as follows \cite{GOLDBERG199169}:
 \begin{itemize}
-  \item Tournament selection - Winning programs are determined by selecting the best programs from a subset of the whole population(a "tournament"). Multiple tournaments are held until we have enough programs selected for the next generation. 
-  \item Proportionate selection - Probability of candidate program being selected for evolution is directly proportional to it's fitness value in the previous generation
-  \item Ranking selection - The population is first ranked according to fitness values, and then a proportionate selection is performed according to the imputed ranks. 
-  \item Genitor(or "steady state") selection - This retains the programs with high fitness even in the next generation. However, the programs with low fitness are replaced with mutated versions of the ones with higher fitness.
+  \item Tournament selection --- Winning programs are determined by selecting the best programs from a subset of the whole population(a \say{tournament}). Multiple tournaments are held until we have enough programs selected for the next generation. 
+  \item Proportionate selection --- Probability of candidate program being selected for evolution is directly proportional to its fitness value in the previous generation
+  \item Ranking selection --- The population is first ranked according to fitness values, and then a proportionate selection is performed according to the imputed ranks. 
+  \item Genitor(or \say{steady state}) selection --- This retains the programs with high fitness even in the next generation. However, the programs with low fitness are replaced with mutated versions of the ones with higher fitness.
 \end{itemize}
 
-In this thesis, we focus only on tournament selections, and impelement a parallelized tournaments using a CUDA kernel. 
+In this thesis, we focus only on tournament selections, and implement parallelized tournaments using a CUDA kernel. 
 \subsection{Mutation}
 \label{subsec:mutation}
 As discussed earlier, the winning programs after selection are not directly a part of the next generation. Rather, we apply genetic operations on them to produce new offspring for the next generations. Some commonly used mutations are(\citep{gplearn})
@@ -76,7 +76,7 @@ We now explain and visualize each mutation type in detail.
 As the name suggests, the current winning program is cloned as a part of the next generation.
 \subsubsection{Point Mutation}
 \label{mut:point}
-In a point mutation, we take the winner of a tournament and replace random nodes from it. For symbolic mathematics, we replace terminals(variables or constants) with terminals and functions with another function of the same arity(number of inputs to the function).
+In a point mutation, we take the winner of a tournament and replace random nodes from it. For symbolic mathematics, we replace terminals(variables or constants) with terminals and functions with another function of the same arity (number of inputs to the function).
 
 This mutation has the effect of reintroducing extinct functions and variables into the population and helps maintain diversity\citep{gplearn}. In our code, the amount of replacement to be done is governed by a per-node probability parameter for replacement. \Cref{fig:point} visualizes the effect of point mutations on a given program.
 
@@ -128,9 +128,9 @@ This mutation serves to reduce bloating of programs with increase in number of g
 
 \subsubsection{Crossover Mutations}
 \label{subsec:crossover}
-Crossover is a method of mixing genetic information between $2$ programs from a given population. In crossover mutations, we first determine a parent and a donor program using $2$ seperate tournaments. We then select a random subtree of the parent program. The child program for the next generation is generated by replacing this subtree with a random subtree from the donor program. 
+Crossover is a method of mixing genetic information between $2$ programs from a given population. In crossover mutations, we first determine a parent and a donor program using $2$ separate tournaments. We then select a random subtree of the parent program. The child program for the next generation is generated by replacing this subtree with a random subtree from the donor program. 
 
-Crossover is considered as the principle method for evolution in our implementation, which is again inspired by \citep{gplearn}. We show a sample visualization of the crossover operation in \cref{fig:crossover}.
+Crossover is considered as the principal method for evolution in our implementation, which is again inspired by \citep{gplearn}. We show a sample visualization of the crossover operation in \Cref{fig:crossover}.
 
 \begin{figure}[htp]
   \centering
@@ -155,9 +155,9 @@ Crossover is considered as the principle method for evolution in our implementat
 
 \subsubsection{Subtree Mutations}
 \label{subsec:subtree}
-In subtree mutations, we perform a crossover between the winning parent tree and a randomly generated program. It serves as a method to increase new terminals and extinct functions in the next generation of programs, and is more agressive compared to a crossover mutation.\citep{gplearn} 
+In subtree mutations, we perform a crossover between the winning parent tree and a randomly generated program. It serves as a method to increase new terminals and extinct functions in the next generation of programs, and is more aggressive compared to a crossover mutation\citep{gplearn}.
 
-\Cref{fig:subtree} visualizes a sample subtree mutation in practice. We note that it is almost the same as the crossover visualization in \Cref*{fig:crossover}, with  the exception being that the donor tree in \cref*{fig:crossover_muta} is now a randomly generated tree in \cref*{fig:subtree_muta}. 
+\Cref{fig:subtree} visualizes a sample subtree mutation in practice. We note that it is almost the same as the crossover visualization in \Cref{fig:crossover}, with  the exception being that the donor tree in \Cref{fig:crossover_muta} is now a randomly generated tree in \Cref{fig:subtree_muta}. 
 
 \begin{figure}[htp]
   \centering
@@ -187,7 +187,7 @@ We perform the evaluation and computation of fitness in our implementation using
 
 \section{Existing Libraries and Their Coverage}
 \label{sec:otherlibs}
-The table below(mostly reproduced from \cite{baeta2021speed}) lists some of the common libraries  used for genetic programming.  
+The table below(mostly reproduced from \cite{baeta2021speed}) lists some common libraries  used for genetic programming.  
 
 \begin{table}[htbp]
   \caption{Existing GP frameworks along with language and device support}
@@ -207,12 +207,12 @@ The table below(mostly reproduced from \cite{baeta2021speed}) lists some of the 
   \end{center}
 \end{table}
 
-Among the libraries listed in \cref{tab:otherlibs}, both TensorGP(\citep{baeta2021tensorgp}) and KarooGP(\citep{staats2017tensorflow}) use the TensorFlow python framework to perform fitness evaluation the GPU. However, while KarooGP uses TensorFlow's \textit{graph} execution model, where every program is compiled into a DAG wheras TensorGP uses TensorFlow's \textit{eager} execution model\citep{agrawal2019tensorflow}, where expressions are evaluated immediately without the overhead of graph construction. The GPU parallelization here is through the use of TensorFlow-based vectorization, and not the explicit use of CUDA. 
+Among the libraries listed in \Cref{tab:otherlibs}, both TensorGP\citep{baeta2021tensorgp} and KarooGP\citep{staats2017tensorflow} use the TensorFlow python framework to perform fitness evaluation the GPU. However, while KarooGP uses TensorFlow's \textit{graph} execution model, where every program is compiled into an optimized computation DAG, TensorGP uses TensorFlow's \textit{eager} execution model\citep{agrawal2019tensorflow}, where expressions are evaluated immediately without the overhead of graph construction. The GPU parallelization here is through the use of TensorFlow-based vectorization, and not the explicit use of CUDA. 
 
-DEAP \citep{DEAP_JMLR2012} is another commonly used Evolutionary Computing framework in Python implements a parallelized version of the GP framework. However, it offers only CPU based parallelization. 
+DEAP\citep{DEAP_JMLR2012} is another commonly used Evolutionary Computing framework in Python implements a parallelized version of the GP framework. However, it offers only CPU based parallelization. 
 
-GPlearn\citep{gplearn} is another Python framework which provides a method to build GP models for symbolic regression, classification and transformation using an API which is compatible with scikit-learn\citep{scikit-learn}. It also provides support for running the evolutionary process in parallel. The base code that is parallelized on GPUs in this thesis is largely inspired by GPlearn. 
+Gplearn\citep{gplearn} is another Python framework which provides a method to build GP models for symbolic regression, classification and transformation using an API which is compatible with scikit-learn\citep{scikit-learn}. It also provides support for running the evolutionary process in parallel. The base code that is parallelized on GPUs in this thesis is largely inspired by gplearn. 
 
-The ECJ Evolutionary Computing Toolkit\citep{Luke1998ECJSoftware} is a Java library for many popular EC algorithms, with a emphasis towards genetic programming. Almost all aspects of \cref{gpalgo} are governed by a hierarchy of user-provided parameter files and classes, and the framework itself is designed for large, heavyweight experimental needs. Using ECJ parameter files, it is also possible to define custom GP pipelines with user-defined evolution strategies.
+The ECJ Evolutionary Computing Toolkit\citep{Luke1998ECJSoftware} is a Java library for many popular EC algorithms, with an emphasis towards genetic programming. Almost all aspects of \Cref{gpalgo} are governed by a hierarchy of user-provided parameter files and classes, and the framework itself is designed for large, heavyweight experimental needs. Using ECJ parameter files, it is also possible to define custom GP pipelines with user-defined evolution strategies.
 
 In the next chapter, we will talk about our work on parallelizing the GP algorithm to perform symbolic regression.
