@@ -211,7 +211,7 @@ footskip=30pt,bottom=1in]{geometry}
 
   \vspace*{0.4in}
   %\centerline{\psfig{figure=emblem.ps}}
-  \centerline{\includegraphics[scale=0.3]{images/iitm.pdf}}
+  \centerline{\includegraphics[scale=0.1]{images/IIT_Madras_Logo.png}}
   \vspace*{-0.2in}
   \begin{center}
     {\bf \large DEPARTMENT OF \MakeUppercase{\@department}\par}
