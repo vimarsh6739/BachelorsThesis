@@ -1,5 +1,5 @@
 \chapter{INTRODUCTION} \label{chap:intro}
-In recent years, there has been a widespread increase in the use of GPUs in the field of machine learning and deep learning, because of their ability to massively speedup the training of models. This is mainly due to the large parallel processing ability of GPUs, which can process multiple inputs using SIMD intrinsics. Genetic Programming(GP) is a class of machine algorithms with several inherent parallel steps. As such, it is an ideal domain for GPU based parallelization. 
+In recent years, there has been a widespread increase in the use of GPUs in the field of machine learning and deep learning, because of their ability to massively speedup the training of models. This is mainly due to the large parallel processing ability of GPUs, which can process multiple inputs using SIMD intrinsics. Genetic Programming(GP) is a class of machine learning algorithms with several inherent parallel steps. As such, it is an ideal domain for GPU based parallelization. 
 
 \section{The Problem}
 \label{intro:problem}
@@ -14,15 +14,15 @@ In this thesis, we provide details about a parallelized version of the generatio
 
 Our main contributions are listed below:
 \begin{itemize}
-  \item We parallelize the selection and evaluation step of the generational GP algorithm, by conducting parallel tournaments and vectorizing evaluation across the dataset as well as the candidate population. 
-  \item We introduce a prefix-tree based Array of Structures (AoS) representation for candidate programs, along with a CUDA kernel to execute all programs on a dataset using a thread-local stack optimized for memory access. 
+  \item We parallelize the selection and evaluation steps of the generational GP algorithm, by conducting parallel tournaments and vectorizing evaluation across the dataset as well as the candidate population. 
+  \item We introduce a prefix-list based Array of Structures (AoS) representation for candidate programs, along with a CUDA kernel to execute all programs on a dataset using a thread-local stack optimized for memory access. 
   \item We also provide a new method to perform tournaments for program selection in parallel using random numbers generated inside the GPU. 
   \item Execution time benchmarks for program evaluation for our algorithm are then provided. The same benchmarks are also run on other standard libraries like gplearn\citep{gplearn} and TensorGP\citep{baeta2021tensorgp}, for comparing training speeds. We then study the effect of population size and dataset size on the final time taken for training. We also conduct a brief analysis of the results of executing our algorithm on synthetic datasets for the Pagie Polynomial\cite{Pagie1997}.
+  \item An important contribution of this work is the integration of the code with \texttt{cuML}\citep{raschka2020machine}, an open source library intended to be a GPU accelerated version of the \texttt{scikit-learn}\citep{scikit-learn} library. This library is a part of the RAPIDS suite of open source libraries maintained by the Nvidia Corporation. 
 \end{itemize}
 
-% YOU FELL FOR IT FOOL! THUNDER CROSS SPLIT ATTACK
-The code for our algorithm is a part of the cuML library\citep{raschka2020machine}, a library intended to be a GPU accelerated version of the scikit-learn
-library\citep{scikit-learn}. The library is a part of the RAPIDS suite of open source libraries maintained by Nvidia Corporation.
+% The code for our algorithm is a part of the cuML library\citep{raschka2020machine}, a library intended to be a GPU accelerated version of the scikit-learn
+% library\citep{scikit-learn}. The library is a part of the RAPIDS suite of open source libraries maintained by Nvidia Corporation.
 
 \section{Outline}
 \label{intro:outline}
@@ -30,7 +30,9 @@ library\citep{scikit-learn}. The library is a part of the RAPIDS suite of open s
 The rest of this thesis is structured in the following way. 
 \begin{itemize}
   \item \Cref{chap:bgrw} introduces the generational GP algorithm in detail, with respect to the selection, mutation and evaluation steps. It also briefly talks about other existing GP libraries and the strategies used for program evaluation in them. 
-  \item \Cref{chap:ourwork} contains implementation details about our algorithm for performing symbolic regression. Here, we examine the new algorithm in detail, and also talk about a few challenges encountered when trying to implement it using CUDA
-  \item \Cref{chap:experiments} contains the results of various benchmarks run on our algorithm implementation and their speedups with respect to some standard GP libraries. It further studies the variation of fitness values and GPU activity with increasing dataset size and generations.
-  \item \Cref{chap:conclusion} talks about future extensions and possible optimizations to the current algorithm, like support for custom user-defined functions in addition to the pre-defined function set.
+  \item \Cref{chap:ourwork} contains implementation details about our algorithm for performing symbolic regression. Here, we examine the new algorithm in detail, and also talk about a few challenges encountered when trying to implement it using CUDA.
+  \item \Cref{chap:experiments} contains the description of the various benchmarks we ran on synthetic datasets. We compare the training time of our implementation with other standard GP libraries, namely \texttt{gplearn}\citep{gplearn}, \texttt{KarooGP}\citep{staats2017tensorflow} and \texttt{TensorGP}\citep{baeta2021tensorgp}.
+  % \item \Cref{chap:experiments} contains the results of various benchmarks run on synthetic datasets and the speedups observed in our implementation with respect to . 
+  We also examine the variation of fitness values and GPU activity with increasing dataset size and generations.
+  \item \Cref{chap:conclusion} talks about future extensions and possible optimizations to the current algorithm, such as support for custom user-defined functions in addition to the pre-defined function set.
 \end{itemize}

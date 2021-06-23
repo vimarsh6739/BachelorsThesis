@@ -1,6 +1,6 @@
 \chapter{BACKGROUND AND RELATED WORK}
 \label{chap:bgrw}
-In this chapter, we describe in detail the generational GP algorithm(\citep{poli08:fieldguide},\citep{RFIgp2016}), which serves as a base for our parallelization experiments in \Cref*{chap:ourwork}. Later on, we also give a brief description of existing work which also parallelizes this algorithm.
+In this chapter, we describe in detail the generational GP algorithm(\citep{poli08:fieldguide},\citep{RFIgp2016}), which serves as a base for our parallelization experiments in \Cref{chap:ourwork}. Later on, we also give a brief description of existing work which also parallelizes this algorithm.
 
 Note that throughout this chapter, the terms program and expression tree are interchangeable, since we are using GP for symbolic regression. 
 
@@ -15,7 +15,7 @@ The generational GP algorithm gives us a method to evolve candidate programs usi
 
 \Cref{gpalgo} formalizes the above $3$ steps. The initial set of programs is usually randomly generated. The termination criterion defined in \Cref*{gpalgoendloop} of the algorithm is usually activated when the number of generations reaches a maximum limit or an early convergence is reached on the given input dataset (usually governed by a user-specified threshold on fitness).
 
-In \Cref*{subsec:selection} to \Cref*{subsec:evaluation}, we dive deep into the selection, mutation and execution steps of the generational GP algorithm. In \Cref*{subsec:mutation}, we define and implement $4$ different possible types of mutation along with reproduction.
+In \Cref{subsec:selection} to \Cref{subsec:evaluation}, we dive deep into the selection, mutation and execution steps of the generational GP algorithm. In \Cref{subsec:mutation}, we define and implement $4$ different possible types of mutation along with reproduction.
 
 
 \begin{algorithm}
@@ -48,7 +48,7 @@ However, we provide support only for the $3$ standard initialization methods in 
 
 \subsection{Selection}
 \label{subsec:selection}
-Selection is the step where individual candidates from a given population are chosen for evolution into the next generation. Some commonly used selection schemes are as follows \cite{GOLDBERG199169}:
+Selection is the step where individual candidates from a given population are chosen for evolution into the next generation. The commonly used selection schemes are as follows\cite{GOLDBERG199169}.
 \begin{itemize}
   \item Tournament selection --- Winning programs are determined by selecting the best programs from a subset of the whole population(a \say{tournament}). Multiple tournaments are held until we have enough programs selected for the next generation. 
   \item Proportionate selection --- Probability of candidate program being selected for evolution is directly proportional to its fitness value in the previous generation
@@ -56,7 +56,7 @@ Selection is the step where individual candidates from a given population are ch
   \item Genitor(or \say{steady state}) selection --- This retains the programs with high fitness even in the next generation. However, the programs with low fitness are replaced with mutated versions of the ones with higher fitness.
 \end{itemize}
 
-In this thesis, we focus only on tournament selections, and implement parallelized tournaments using a CUDA kernel. 
+In this thesis, we focus only on tournament selections, and implement parallelized tournaments using a CUDA kernel. This is in an effort to make our implementation consistent with \texttt{gplearn}\citep{gplearn}, which also only implements tournament selection. 
 \subsection{Mutation}
 \label{subsec:mutation}
 As discussed earlier, the winning programs after selection are not directly a part of the next generation. Rather, we apply genetic operations on them to produce new offspring for the next generations. Some commonly used mutations are(\citep{gplearn})
@@ -78,7 +78,9 @@ As the name suggests, the current winning program is cloned as a part of the nex
 \label{mut:point}
 In a point mutation, we take the winner of a tournament and replace random nodes from it. For symbolic mathematics, we replace terminals(variables or constants) with terminals and functions with another function of the same arity (number of inputs to the function).
 
-This mutation has the effect of reintroducing extinct functions and variables into the population and helps maintain diversity\citep{gplearn}. In our code, the amount of replacement to be done is governed by a per-node probability parameter for replacement. \Cref{fig:point} visualizes the effect of point mutations on a given program.
+This mutation has the effect of reintroducing extinct functions and variables into the population and helps maintain diversity\citep{gplearn}. In our code, the amount of replacement to be done is governed by a per-node probability parameter for replacement. 
+
+\Cref{fig:point} visualizes the effect of point mutations on a given program, where a subset of the functions and terminals in the original program in \Cref{fig:point_muta} are replaced with new functions and terminals in \Cref{fig:point_mutb} respectively.
 
 \begin{figure}[htp]
   \centering
@@ -102,9 +104,10 @@ This mutation has the effect of reintroducing extinct functions and variables in
 
 \subsubsection{Hoist Mutations}
 \label{subsec:hoist}
-In hoist mutations, we take the winner of a tournament and selects a random subtree from it. Another random subtree is selected from this subtree as a replacement for the subtree from the program. 
+In hoist mutations, we take the winner of a tournament and select a random subtree from it. Another random subtree is selected from this subtree as a replacement for the subtree from the program. 
+This mutation serves to reduce bloating of programs with increase in number of generations. 
 
-This mutation serves to reduce bloating of programs with increase in number of generations. \Cref{fig:hoist} visualizes the effect of hoist mutations on a given expression tree.
+\Cref{fig:hoist} visualizes the effect of hoist mutations on a given expression tree. In \Cref{fig:hoist_muta}, the left subtree of the root node, and a subtree of the left subtree, shaded grey and light grey respectively, are chosen for hoisting. The entire left subtree is then replaced with just the chosen sub-subtree, as seen in \Cref{fig:hoist_mutb}.
 
 \begin{figure}[htp]
   \centering
@@ -121,7 +124,7 @@ This mutation serves to reduce bloating of programs with increase in number of g
     \caption{The same expression tree after hoisting the sub-subtree onto it's parent's position.}
     \label{fig:hoist_mutb}
   \end{subfigure}
-  \caption{Visualizing hoist mutations for an expression tree. }
+  \caption{Visualizing hoist mutations for an expression tree.}
   
   \label{fig:hoist}
 \end{figure}
@@ -130,7 +133,7 @@ This mutation serves to reduce bloating of programs with increase in number of g
 \label{subsec:crossover}
 Crossover is a method of mixing genetic information between $2$ programs from a given population. In crossover mutations, we first determine a parent and a donor program using $2$ separate tournaments. We then select a random subtree of the parent program. The child program for the next generation is generated by replacing this subtree with a random subtree from the donor program. 
 
-Crossover is considered as the principal method for evolution in our implementation, which is again inspired by \citep{gplearn}. We show a sample visualization of the crossover operation in \Cref{fig:crossover}.
+Crossover is considered as the principal method for evolution in our implementation, which is again inspired by \citet{gplearn}. We show a sample visualization of the crossover operation in \Cref{fig:crossover}. \Cref{fig:crossover_muta} contains both the parent and donor trees, along with random subtrees chosen from them. \Cref{fig:crossover_mutb} visualizes the nodes of the child tree after replacing the selected subtree in the parent with the donor subtree. 
 
 \begin{figure}[htp]
   \centering
@@ -148,7 +151,7 @@ Crossover is considered as the principal method for evolution in our implementat
       \caption{The child expression tree after replacing a subtree of the parent with that of the donor.}
       \label{fig:crossover_mutb}
     \end{subfigure}
-  \caption{Visualizing crossover mutations for a given parent and donor program.}
+  \caption{Visualizing crossover mutations for a given parent and donor expression tree.}
   
   \label{fig:crossover}
 \end{figure}
@@ -157,33 +160,35 @@ Crossover is considered as the principal method for evolution in our implementat
 \label{subsec:subtree}
 In subtree mutations, we perform a crossover between the winning parent tree and a randomly generated program. It serves as a method to increase new terminals and extinct functions in the next generation of programs, and is more aggressive compared to a crossover mutation\citep{gplearn}.
 
-\Cref{fig:subtree} visualizes a sample subtree mutation in practice. We note that it is almost the same as the crossover visualization in \Cref{fig:crossover}, with  the exception being that the donor tree in \Cref{fig:crossover_muta} is now a randomly generated tree in \Cref{fig:subtree_muta}. 
+\Cref{fig:crossover} can again be used to visualize subtree mutations. The only difference between crossover and subtree mutations is that in subtree mutations, the donor program in \Cref{fig:crossover_muta} is now a randomly generated tree. 
 
-\begin{figure}[htp]
-  \centering
-  \begin{subfigure}{\textwidth}
-    \begin{adjustbox}{width=\columnwidth,center}
-      \includegraphics{images/graphviz/subtree_before.dot.pdf}
-    \end{adjustbox}
-    \caption{The parent expression tree and a randomly generated tree is shown here.}
-    \label{fig:subtree_muta}
-  \end{subfigure}%
-  \\
-  \begin{subfigure}{\textwidth}
-    \centering
-    \includegraphics[scale=0.75]{images/graphviz/subtree_after.dot.pdf}
-    \caption{The child expression tree after replacing a subtree of the parent with that of the random tree.}
-    \label{fig:subtree_mutb}
-  \end{subfigure}
-  \caption{Visualizing subtree mutations for a given parent program.}
-  \label{fig:subtree}
-\end{figure}
+% \Cref{fig:subtree} visualizes a sample subtree mutation in practice. We note that it is almost the same as the crossover visualization in \Cref{fig:crossover}, with  the exception being that the donor tree in \Cref{fig:crossover_muta} is now a randomly generated tree in \Cref{fig:subtree_muta}. 
+
+% \begin{figure}[htp]
+%   \centering
+%   \begin{subfigure}{\textwidth}
+%     \begin{adjustbox}{width=\columnwidth,center}
+%       \includegraphics{images/graphviz/subtree_before.dot.pdf}
+%     \end{adjustbox}
+%     \caption{The parent expression tree and a randomly generated tree is shown here.}
+%     \label{fig:subtree_muta}
+%   \end{subfigure}%
+%   \\
+%   \begin{subfigure}{\textwidth}
+%     \centering
+%     \includegraphics[scale=0.75]{images/graphviz/subtree_after.dot.pdf}
+%     \caption{The child expression tree after replacing a subtree of the parent with that of the random tree.}
+%     \label{fig:subtree_mutb}
+%   \end{subfigure}
+%   \caption{Visualizing subtree mutations for a given parent program.}
+%   \label{fig:subtree}
+% \end{figure}
   
 \subsection{Evaluation}
 \label{subsec:evaluation}
 Once the population for the next generation is decided after selection and mutation, the fitness of all programs in the new generation is recomputed. This step is the major bottleneck when scaling the generational GP algorithm to bigger datasets and bigger populations, as the evaluation is independent for every program and every row of the input dataset. 
 
-We perform the evaluation and computation of fitness in our implementation using a CUDA kernel and linear algebra primitives specified in the RAFT library(\citep{raschka2020machine}).
+We perform the evaluation and computation of fitness in our implementation using a CUDA kernel and linear algebra primitives specified in the \texttt{raft} library(\citep{raschka2020machine}).
 
 \section{Existing Libraries and Their Coverage}
 \label{sec:otherlibs}
