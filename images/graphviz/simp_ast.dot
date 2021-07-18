@@ -1,0 +1,11 @@
+digraph simp_ast {
+	A [label="+"]
+	B [label="*"]
+	C [label=a]
+	D [label=a]
+	E [label=b]
+	A -> B
+	A -> E
+	B -> C
+	B -> D
+}
