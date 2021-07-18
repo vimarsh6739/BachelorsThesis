@@ -1,2 +1,2 @@
 # Bachelor's Thesis
-Some TeX stuff here.
+TeX for my B.Tech Project Report and presentation
